@@ -89,7 +89,7 @@ function casePage(){
  const gallery=p.gallery.map((m,i)=>{
   const label=tr(`${t.title}: изображение ${i+1}`,`${t.title}: image ${i+1}`);
   const visual=media(m,label);
-  if(route==='poster')return `<div class="poster-item">${visual}</div>`;
+  if(route==='poster')return `<button type="button" class="poster-item" data-enlarge="${m.asset}" data-caption="" data-image-alt="${escape(label)}" aria-label="${escape(tr('увеличить: ','enlarge: ')+label)}">${visual}</button>`;
   if(route==='time')return `<button class="image-button" data-enlarge="${m.asset}" data-caption="${escape(label)}" aria-label="${escape(tr('увеличить: ','enlarge: ')+label)}" ${route==='time'?`style="width:${m.w/660*100}%"`:''}>${visual}</button>`;
   return visual;
  }).join('');
@@ -170,9 +170,9 @@ document.addEventListener('click',e=>{
  if(e.target.closest('[data-toggle-stages]')){toggleStages(!stageOpen);return;}
  if(e.target.closest('[data-close-stages]')){toggleStages(false);$('[data-toggle-stages]').focus({preventScroll:true});scrollSection('stages');return;}
  const slide=e.target.closest('[data-slide-dir]');if(slide){changeSlide(Number(slide.dataset.slideDir));return;}
- const enlarge=e.target.closest('[data-enlarge]');if(enlarge){const dialog=$('#lightbox');$('img',dialog).src=assets[enlarge.dataset.enlarge].src;$('img',dialog).alt=enlarge.dataset.caption;$('p',dialog).textContent=enlarge.dataset.caption;dialog.showModal();document.body.classList.add('modal-open');}
+ const enlarge=e.target.closest('[data-enlarge]');if(enlarge){const dialog=$('#lightbox');$('img',dialog).src=assets[enlarge.dataset.enlarge].src;$('img',dialog).alt=enlarge.dataset.imageAlt||enlarge.dataset.caption||'';const caption=$('p',dialog);caption.textContent=enlarge.dataset.caption||'';caption.hidden=!caption.textContent;dialog.append(cursor);cursor.classList.remove('hover');dialog.showModal();document.body.classList.add('modal-open');}
 });
-const dialog=$('#lightbox');$('.lightbox-close').onclick=()=>dialog.close();dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});dialog.addEventListener('close',()=>document.body.classList.remove('modal-open'));
+const dialog=$('#lightbox');$('.lightbox-close').onclick=()=>dialog.close();dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});dialog.addEventListener('close',()=>{document.body.classList.remove('modal-open');document.body.append(cursor);cursor.classList.toggle('hover',!!document.elementFromPoint(cursorX,cursorY)?.closest('a,button'));});
 addEventListener('hashchange',onRoute);addEventListener('scroll',()=>{if(!scrollPending){scrollPending=true;requestAnimationFrame(()=>{scrollPending=false;updateScroll()})}},{passive:true});addEventListener('resize',updateScroll);
 // Preserve the original portfolio cursor and its hover behaviour.
 const cursor=$('#cursor');let cursorX=0,cursorY=0,pending=false;
